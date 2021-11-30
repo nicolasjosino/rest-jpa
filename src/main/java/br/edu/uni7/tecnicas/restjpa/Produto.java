@@ -1,10 +1,15 @@
 package br.edu.uni7.tecnicas.restjpa;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 @Entity
 public class Produto {
@@ -18,6 +23,10 @@ public class Produto {
 	
 	@Column(name = "preco")
 	private Double preço;
+
+//	@ManyToMany(mappedBy = "produtos", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@ManyToMany(mappedBy = "produtos", cascade = CascadeType.PERSIST)
+	private List<Fornecedor> fornecedores = new ArrayList<Fornecedor>();
 	
 	public Produto() {	
 	}
@@ -51,5 +60,12 @@ public class Produto {
 	public void setPreço(Double preço) {
 		this.preço = preço;
 	}
+		
+	public List<Fornecedor> getFornecedores() {
+		return fornecedores;
+	}
 	
+	public void setFornecedores(List<Fornecedor> fornecedores) {
+		this.fornecedores = fornecedores;
+	}
 }

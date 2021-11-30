@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +26,8 @@ public class ProdutoController {
 		List<Produto> produtos = repository.findAll();
 		
 		if (!produtos.isEmpty()) {
-			response = ResponseEntity.ok(produtos);
+//			response = ResponseEntity.ok(produtos);
+			response = new ResponseEntity<List<Produto>>(produtos, HttpStatus.OK);
 		}
 		
 		return response;
@@ -32,14 +35,12 @@ public class ProdutoController {
 	
 	@PostMapping(path = "/produtos")
 	public ResponseEntity<Produto> criarProduto(
-			@RequestParam(name="nome") String nome,
-			@RequestParam(name = "preco") Double preco) {
+			@RequestParam(name="nome") String nome, @RequestParam(name = "preco") Double preco,
+			@RequestBody Fornecedor fornecedor) {
 		Produto produto = new Produto(null, nome, preco);
-		
-		//1 - Salvar no banco
+		produto.getFornecedores().add(fornecedor);
+		fornecedor.getProdutos().add(produto);
 		repository.save(produto);
-		
-		//2 - Retornar o produto
 		return new ResponseEntity<Produto>(HttpStatus.CREATED);
 	}
 	
@@ -55,5 +56,19 @@ public class ProdutoController {
 			response = new ResponseEntity<Integer>(HttpStatus.NOT_FOUND);
 		}
 		return response;		
+	}
+	
+	@PutMapping(path = "/produtos")
+	public ResponseEntity<Produto> atualizar(@RequestBody Produto produto) {
+		ResponseEntity<Produto> response = 
+				new ResponseEntity<Produto>(HttpStatus.NOT_FOUND);
+		
+		Optional<Produto> fromDB = repository.findById(produto.getId());
+		if (fromDB.isPresent()) {
+			repository.save(produto);
+			
+			response = ResponseEntity.ok(produto);
+		}
+		return response;
 	}
 }
